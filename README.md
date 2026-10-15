@@ -94,9 +94,9 @@ information.
 
 ## Inspect published SBOMs
 
-This repository includes an optional helper to read an SPDX SBOM attested by this action. With [`jq`](https://jqlang.org/)
-and [Cosign](https://docs.sigstore.dev/cosign/system_config/installation/) installed, it runs directly. Otherwise, it
-uses Docker and the published tools image automatically:
+This repository includes an optional helper to read an SPDX SBOM attested by this action. With
+[`jq`](https://jqlang.org/) and [Cosign](https://docs.sigstore.dev/cosign/system_config/installation/) installed, it
+runs directly. Otherwise, it uses Docker and the published tools image automatically:
 
 ```bash
 curl -fsSLO https://raw.githubusercontent.com/gh-workflow/image-sbom/v1/scripts/{lib,show-sbom}.sh
@@ -115,7 +115,8 @@ documents to `./sbom`, and attaches each as a Cosign attestation. The scripts ru
 Cosign installations, or automatically use Docker and the published tools image when those tools are absent:
 
 ```bash
-curl -fsSLO https://raw.githubusercontent.com/gh-workflow/image-sbom/v1/scripts/{lib,resolve-image-manifests,generate-attest-sbom,create-attest-sbom}.sh
+base_url=https://raw.githubusercontent.com/gh-workflow/image-sbom/v1/scripts
+curl -fsSLO "${base_url}"/{lib,resolve-image-manifests,generate-attest-sbom,create-attest-sbom}.sh
 chmod +x create-attest-sbom.sh resolve-image-manifests.sh generate-attest-sbom.sh
 ./create-attest-sbom.sh <image-reference>
 ```
