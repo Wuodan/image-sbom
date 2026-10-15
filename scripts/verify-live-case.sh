@@ -9,14 +9,17 @@ set -euo pipefail
 : "${RUNNER_TEMP:?}"
 
 download_attestation() {
-  if [[ -n "${IMAGE_SBOM_TOOLS_IMAGE:-}" ]]; then
+  if command -v cosign >/dev/null 2>&1; then
+    cosign download attestation "$@"
+  elif [[ -n "${IMAGE_SBOM_TOOLS_IMAGE:-}" ]]; then
     docker run --rm \
       --entrypoint cosign \
       -v "${HOME}/.docker:/root/.docker:ro" \
       "${IMAGE_SBOM_TOOLS_IMAGE}" \
       download attestation "$@"
   else
-    cosign download attestation "$@"
+    echo "cosign is required to download attestations." >&2
+    exit 1
   fi
 }
 
