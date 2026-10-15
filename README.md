@@ -108,6 +108,24 @@ Replace `<image-reference>` with the image tag or digest to inspect. Omit `--pac
 document. For a multi-platform image, use `--platform linux/arm64` to select a platform other than the default
 `linux/amd64`.
 
+## Generate and attest SBOMs locally
+
+Use the standalone creator outside GitHub Actions. It generates one SBOM per runnable image platform, writes the
+documents to `./sbom`, and attaches each as a Cosign attestation. The scripts run with local `jq`, Crane, Syft, and
+Cosign installations, or automatically use Docker and the published tools image when those tools are absent:
+
+```bash
+curl -fsSLO https://raw.githubusercontent.com/gh-workflow/image-sbom/v1/scripts/{lib,resolve-image-manifests,generate-attest-sbom,create-attest-sbom}.sh
+chmod +x create-attest-sbom.sh resolve-image-manifests.sh generate-attest-sbom.sh
+./create-attest-sbom.sh <image-reference>
+```
+
+Pass any Cosign attestation options after `--`:
+
+```bash
+./create-attest-sbom.sh <image-reference> -- --key ./cosign.key
+```
+
 ## License
 
 MIT

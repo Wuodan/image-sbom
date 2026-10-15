@@ -20,6 +20,21 @@ if [ -n "${REGISTRY_USERNAME}" ] || [ -n "${REGISTRY_PASSWORD}" ]; then
 
 fi
 
+attest_image() {
+  sbom_file="$1"
+  image="$2"
+  shift 2
+
+  if [ -n "${REGISTRY_USERNAME}" ]; then
+    cosign attest --yes --type "${PREDICATE_TYPE}" --signing-config "${signing_config}" \
+      --registry-username "${REGISTRY_USERNAME}" --registry-password "${REGISTRY_PASSWORD}" \
+      "$@" --predicate "${sbom_file}" "${image}"
+  else
+    cosign attest --yes --type "${PREDICATE_TYPE}" --signing-config "${signing_config}" \
+      "$@" --predicate "${sbom_file}" "${image}"
+  fi
+}
+
 while IFS= read -r image; do
   [ -n "${image}" ] || continue
   image_digest="${image##*@}"
@@ -39,12 +54,5 @@ while IFS= read -r image; do
   fi
 
   "${SYFT_CMD}" scan "registry:${image}" -o "${FORMAT}" >"${sbom_file}"
-  if [ -n "${REGISTRY_USERNAME}" ]; then
-    cosign attest --yes --type "${PREDICATE_TYPE}" --signing-config "${signing_config}" \
-      --registry-username "${REGISTRY_USERNAME}" --registry-password "${REGISTRY_PASSWORD}" \
-      --predicate "${sbom_file}" "${image}"
-  else
-    cosign attest --yes --type "${PREDICATE_TYPE}" --signing-config "${signing_config}" \
-      --predicate "${sbom_file}" "${image}"
-  fi
+  attest_image "${sbom_file}" "${image}" "$@"
 done <"${RESOLVED_IMAGES_FILE}"
