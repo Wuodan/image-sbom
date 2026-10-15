@@ -2,8 +2,36 @@
 set -eu
 
 SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-. "${SCRIPT_DIR}/lib.sh"
-image_sbom_require_tools "$0" "crane jq cosign" "$@"
+
+missing_tools=""
+for tool in crane jq cosign; do
+  if ! command -v "${tool}" >/dev/null 2>&1; then
+    missing_tools="${missing_tools} ${tool}"
+  fi
+done
+
+if [ -n "${missing_tools}" ]; then
+  if ! command -v docker >/dev/null 2>&1; then
+    printf '%s\n' "[show-sbom] missing required tools:${missing_tools}" >&2
+    printf '%s\n' "[show-sbom] install them or Docker to use ghcr.io/gh-workflow/image-sbom." >&2
+    exit 1
+  fi
+
+  script_path="${SCRIPT_DIR}/$(basename -- "$0")"
+  working_dir=$(pwd -P)
+  tools_image="${IMAGE_SBOM_TOOLS_IMAGE:-ghcr.io/gh-workflow/image-sbom:v1}"
+  env_file=$(mktemp)
+  trap 'rm -f "${env_file}"' EXIT HUP INT TERM
+  env | grep -E '^(COSIGN|SIGSTORE|REGISTRY)_[A-Za-z0-9_]*=' >"${env_file}" || true
+
+  docker run --rm --entrypoint /bin/sh \
+    --env-file "${env_file}" \
+    -v "${script_path}:/image-sbom/show-sbom.sh:ro" \
+    -v "${working_dir}:${working_dir}" \
+    -w "${working_dir}" \
+    "${tools_image}" /image-sbom/show-sbom.sh "$@"
+  exit $?
+fi
 
 usage() {
   cat <<'USAGE'

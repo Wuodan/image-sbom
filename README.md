@@ -100,7 +100,7 @@ This repository includes an optional helper to read an SPDX SBOM attested by thi
 installed, it runs directly. Otherwise, it uses Docker and the published tools image automatically:
 
 ```bash
-curl -fsSLO https://raw.githubusercontent.com/gh-workflow/image-sbom/v1/scripts/{lib,show-sbom}.sh
+curl -fsSLO https://raw.githubusercontent.com/gh-workflow/image-sbom/v1/scripts/show-sbom.sh
 chmod +x show-sbom.sh
 ./show-sbom.sh --packages <image-reference>
 ```
@@ -116,9 +116,8 @@ documents to `./sbom`, and attaches each as a Cosign attestation. The scripts ru
 Cosign installations, or automatically use Docker and the published tools image when those tools are absent:
 
 ```bash
-base_url=https://raw.githubusercontent.com/gh-workflow/image-sbom/v1/scripts
-curl -fsSLO "${base_url}"/{lib,resolve-image-manifests,generate-attest-sbom,create-attest-sbom}.sh
-chmod +x create-attest-sbom.sh resolve-image-manifests.sh generate-attest-sbom.sh
+curl -fsSLO https://raw.githubusercontent.com/gh-workflow/image-sbom/v1/scripts/create-attest-sbom.sh
+chmod +x create-attest-sbom.sh
 ./create-attest-sbom.sh <image-reference>
 ```
 
