@@ -2,9 +2,14 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "forkProcessing": "enabled",
   "separateMajorMinor": false,
-  "enabledManagers": ["github-actions"],
+  "enabledManagers": ["dockerfile", "github-actions"],
   "labels": ["dependencies"],
   "packageRules": [
+    {
+      "matchManagers": ["dockerfile"],
+      "groupName": "container-images",
+      "minimumReleaseAge": "3 days"
+    },
     {
       "matchManagers": ["github-actions"],
       "groupName": "github-actions",

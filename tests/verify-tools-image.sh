@@ -1,0 +1,12 @@
+#!/bin/sh
+set -eu
+
+: "${IMAGE:?}"
+
+docker run --rm --entrypoint /bin/sh "${IMAGE}" -c '
+  set -eu
+  cosign version >/dev/null
+  syft version >/dev/null
+  crane version >/dev/null
+  jq --version >/dev/null
+'
