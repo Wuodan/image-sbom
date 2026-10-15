@@ -119,7 +119,7 @@ jobs:
           EXPECTED_MEDIA: ${{ matrix.expected-media }}
           EXPECTED_IMAGES: ${{ matrix.expected-images }}
           EXPECTED_NON_RUNNABLE: ${{ matrix.expected-non-runnable }}
-        run: scripts/verify-live-case.sh
+        run: tests/scripts/verify-live-case.sh
 
       - name: Test SBOM reader
         env:
