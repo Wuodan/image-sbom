@@ -1,6 +1,10 @@
 #!/bin/sh
 set -eu
 
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+. "${SCRIPT_DIR}/lib.sh"
+image_sbom_require_tools "$0" "jq cosign" "$@"
+
 usage() {
   cat <<'USAGE'
 Usage: show-sbom.sh [--packages] [--platform <platform>] <image>
@@ -56,8 +60,6 @@ while [ "$#" -gt 0 ]; do
 done
 
 [ -n "${IMAGE_REF}" ] || usage
-command -v jq >/dev/null 2>&1 || die "jq is required"
-command -v cosign >/dev/null 2>&1 || die "cosign is required"
 
 SPDX_SBOM="$(
   cosign download attestation \

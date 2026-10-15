@@ -49,6 +49,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      packages: write
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -77,6 +78,33 @@ jobs:
               -f ref="refs/tags/${major_tag}" \
               -f sha="${TARGET_SHA}"
           fi
+
+      - name: Log in to GHCR
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - name: Publish tools image
+        env:
+          IMAGE: ghcr.io/${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          major_tag="${RELEASE_TAG%%.*}"
+          docker buildx build \
+            --platform linux/amd64,linux/arm64 \
+            --push \
+            --tag "${IMAGE}:${RELEASE_TAG}" \
+            --tag "${IMAGE}:${major_tag}" \
+            .
 
       - name: Create GitHub release
         env:

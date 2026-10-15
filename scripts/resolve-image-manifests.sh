@@ -1,6 +1,11 @@
 #!/bin/sh
 set -eu
 
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+. "${SCRIPT_DIR}/lib.sh"
+
+image_sbom_require_tools "$0" "crane jq" "$@"
+
 image_repo="${IMAGE}"
 if [ "${image_repo}" != "${image_repo%@sha256:*}" ]; then
   image_repo="${image_repo%@sha256:*}"

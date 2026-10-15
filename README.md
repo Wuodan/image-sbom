@@ -94,11 +94,12 @@ information.
 
 ## Inspect published SBOMs
 
-This repository includes an optional helper to read an SPDX SBOM attested by this action. It requires Docker with
-Buildx, [`jq`](https://jqlang.org/), and [Cosign](https://docs.sigstore.dev/cosign/system_config/installation/):
+This repository includes an optional helper to read an SPDX SBOM attested by this action. With [`jq`](https://jqlang.org/)
+and [Cosign](https://docs.sigstore.dev/cosign/system_config/installation/) installed, it runs directly. Otherwise, it
+uses Docker and the published tools image automatically:
 
 ```bash
-curl -fsSLO https://raw.githubusercontent.com/gh-workflow/image-sbom/v1/scripts/show-sbom.sh
+curl -fsSLO https://raw.githubusercontent.com/gh-workflow/image-sbom/v1/scripts/{lib,show-sbom}.sh
 chmod +x show-sbom.sh
 ./show-sbom.sh --packages <image-reference>
 ```
