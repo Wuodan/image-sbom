@@ -6,7 +6,7 @@ SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 
 image_sbom_require_tools "$0" "cosign syft" "$@"
 
-signing_config="${RUNNER_TEMP}/cosign-signing-config.json"
+signing_config="${SBOM_DIR}/cosign-signing-config.json"
 cosign signing-config create \
   --with-default-services \
   --no-default-rekor \
