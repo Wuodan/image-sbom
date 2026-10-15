@@ -8,6 +8,18 @@ set -euo pipefail
 : "${EXPECTED_NON_RUNNABLE:?}"
 : "${RUNNER_TEMP:?}"
 
+download_attestation() {
+  if [[ -n "${IMAGE_SBOM_TOOLS_IMAGE:-}" ]]; then
+    docker run --rm \
+      --entrypoint cosign \
+      -v "${HOME}/.docker:/root/.docker:ro" \
+      "${IMAGE_SBOM_TOOLS_IMAGE}" \
+      download attestation "$@"
+  else
+    cosign download attestation "$@"
+  fi
+}
+
 inspect_json="$(docker buildx imagetools inspect --raw "${IMAGE}")"
 media_type="$(jq -r '.mediaType // ""' <<<"${inspect_json}")"
 
@@ -90,7 +102,7 @@ done
 
 for image in "${resolved_images[@]}"; do
   attestation_file="${RUNNER_TEMP}/attestations-${image##*@}.json"
-  cosign download attestation "${image}" >"${attestation_file}"
+  download_attestation "${image}" >"${attestation_file}"
   jq -e '
     select(
       .dsseEnvelope.payload
