@@ -3,7 +3,7 @@ set -eu
 
 : "${IMAGE:?}"
 
-docker run --rm --entrypoint /bin/sh "${IMAGE}" -c '
+docker run --rm "${IMAGE}" -c '
   set -eu
   cosign version >/dev/null
   cosign signing-config create --with-default-services --no-default-rekor >/dev/null

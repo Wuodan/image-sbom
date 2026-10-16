@@ -71,7 +71,7 @@ runs:
         fi
         args+=("${IMAGE}")
 
-        docker run --rm --entrypoint /bin/sh \
+        docker run --rm \
           -e ACTIONS_ID_TOKEN_REQUEST_TOKEN \
           -e ACTIONS_ID_TOKEN_REQUEST_URL \
           -v "${ACTION_PATH}/scripts:/image-sbom/scripts:ro" \

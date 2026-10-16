@@ -24,7 +24,7 @@ if [ -n "${missing_tools}" ]; then
   trap 'rm -f "${env_file}"' EXIT HUP INT TERM
   env | grep -E '^(COSIGN|SIGSTORE|REGISTRY)_[A-Za-z0-9_]*=' >"${env_file}" || true
 
-  docker run --rm --entrypoint /bin/sh \
+  docker run --rm \
     --env-file "${env_file}" \
     -v "${script_path}:/image-sbom/show-sbom.sh:ro" \
     -v "${working_dir}:${working_dir}" \
