@@ -94,16 +94,17 @@ jobs:
 
       - name: Publish tools image
         env:
-          IMAGE: ghcr.io/${{ github.repository }}
+          REPOSITORY: ${{ github.repository }}
           RELEASE_TAG: ${{ github.ref_name }}
         run: |
           set -euo pipefail
+          image="ghcr.io/${REPOSITORY,,}"
           major_tag="${RELEASE_TAG%%.*}"
           docker buildx build \
             --platform linux/amd64,linux/arm64 \
             --push \
-            --tag "${IMAGE}:${RELEASE_TAG}" \
-            --tag "${IMAGE}:${major_tag}" \
+            --tag "${image}:${RELEASE_TAG}" \
+            --tag "${image}:${major_tag}" \
             .
 
       - name: Create GitHub release
