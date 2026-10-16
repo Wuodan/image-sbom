@@ -43,13 +43,9 @@ runs:
         case "${FORMAT}" in
           spdx-json)
             echo "SBOM_DIR=${sbom_dir}" >>"${GITHUB_OUTPUT}"
-            echo "SBOM_EXT=spdx.json" >>"${GITHUB_OUTPUT}"
-            echo "PREDICATE_TYPE=spdxjson" >>"${GITHUB_OUTPUT}"
             ;;
           cyclonedx-json)
             echo "SBOM_DIR=${sbom_dir}" >>"${GITHUB_OUTPUT}"
-            echo "SBOM_EXT=cyclonedx.json" >>"${GITHUB_OUTPUT}"
-            echo "PREDICATE_TYPE=cyclonedx" >>"${GITHUB_OUTPUT}"
             ;;
           *)
             echo "::error::Unsupported format '${FORMAT}'. Supported values are: spdx-json, cyclonedx-json."
@@ -57,56 +53,28 @@ runs:
             ;;
         esac
 
-    - name: Resolve runnable image manifests
-      id: resolve
-      shell: bash
-      env:
-        TOOL_IMAGE: ${{ env.IMAGE_SBOM_TOOLS_IMAGE || 'ghcr.io/gh-workflow/image-sbom:v1' }}
-        IMAGE: ${{ inputs.image }}
-        SBOM_DIR: ${{ steps.paths.outputs.SBOM_DIR }}
-        REGISTRY_USERNAME: ${{ inputs.registry-username }}
-        REGISTRY_PASSWORD: ${{ inputs.registry-password }}
-        ACTION_PATH: ${{ github.action_path }}
-      run: |
-        set -euo pipefail
-        docker run --rm --entrypoint /bin/sh \
-          -e IMAGE \
-          -e SBOM_DIR \
-          -e REGISTRY_USERNAME \
-          -e REGISTRY_PASSWORD \
-          -v "${ACTION_PATH}/scripts:/image-sbom/scripts:ro" \
-          -v "${SBOM_DIR}:${SBOM_DIR}" \
-          "${TOOL_IMAGE}" \
-          /image-sbom/scripts/action/resolve-image-manifests.sh
-        echo "RESOLVED_IMAGES_FILE=${SBOM_DIR}/resolved-images.txt" >>"${GITHUB_OUTPUT}"
-
     - name: Generate and attest SBOM
-      id: generate
       shell: bash
       env:
         TOOL_IMAGE: ${{ env.IMAGE_SBOM_TOOLS_IMAGE || 'ghcr.io/gh-workflow/image-sbom:v1' }}
         FORMAT: ${{ inputs.format }}
-        PREDICATE_TYPE: ${{ steps.paths.outputs.PREDICATE_TYPE }}
+        IMAGE: ${{ inputs.image }}
         REGISTRY_USERNAME: ${{ inputs.registry-username }}
         REGISTRY_PASSWORD: ${{ inputs.registry-password }}
-        RESOLVED_IMAGES_FILE: ${{ steps.resolve.outputs.RESOLVED_IMAGES_FILE }}
         SBOM_DIR: ${{ steps.paths.outputs.SBOM_DIR }}
-        SBOM_EXT: ${{ steps.paths.outputs.SBOM_EXT }}
         ACTION_PATH: ${{ github.action_path }}
       run: |
         set -euo pipefail
+        args=(--format "${FORMAT}" --output-dir "${SBOM_DIR}")
+        if [[ -n "${REGISTRY_USERNAME}" || -n "${REGISTRY_PASSWORD}" ]]; then
+          args+=(--registry-username "${REGISTRY_USERNAME}" --registry-password "${REGISTRY_PASSWORD}")
+        fi
+        args+=("${IMAGE}")
+
         docker run --rm --entrypoint /bin/sh \
           -e ACTIONS_ID_TOKEN_REQUEST_TOKEN \
           -e ACTIONS_ID_TOKEN_REQUEST_URL \
-          -e FORMAT \
-          -e PREDICATE_TYPE \
-          -e REGISTRY_USERNAME \
-          -e REGISTRY_PASSWORD \
-          -e RESOLVED_IMAGES_FILE \
-          -e SBOM_DIR \
-          -e SBOM_EXT \
-          -e SYFT_CMD=syft \
           -v "${ACTION_PATH}/scripts:/image-sbom/scripts:ro" \
           -v "${SBOM_DIR}:${SBOM_DIR}" \
           "${TOOL_IMAGE}" \
-          /image-sbom/scripts/action/generate-attest-sbom.sh
+          /image-sbom/scripts/create-attest-sbom.sh "${args[@]}"
