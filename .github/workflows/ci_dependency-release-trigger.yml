@@ -64,11 +64,7 @@ jobs:
             exit 0
           fi
 
-          {
-            echo "create_tag=true"
-            echo "pr_number=$(jq -r '.number' <<< "$pr_json")"
-            echo "pr_title=$(jq -r '.title' <<< "$pr_json")"
-          } >> "$GITHUB_OUTPUT"
+          echo "create_tag=true" >> "$GITHUB_OUTPUT"
 
       - name: Checkout
         if: steps.pr.outputs.create_tag == 'true'
