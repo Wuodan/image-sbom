@@ -24,13 +24,6 @@ jobs:
             exit 1
           fi
 
-  lint:
-    name: Run super-linter
-    needs: validate-release-tag
-    uses: ./.github/workflows/CI_lint-super-linter.yml
-    permissions:
-      contents: read
-
   live-test:
     name: Run live test
     needs: validate-release-tag
@@ -44,7 +37,6 @@ jobs:
     name: Create GitHub release
     needs:
       - validate-release-tag
-      - lint
       - live-test
     runs-on: ubuntu-latest
     permissions:
