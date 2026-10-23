@@ -2,10 +2,6 @@ name: "CI: lint (super-linter)"
 
 "on":
   workflow_call:
-  pull_request:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
 permissions:
